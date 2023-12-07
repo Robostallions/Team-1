@@ -9,7 +9,6 @@
 # PROS
 bin/
 .cache/
-compile_commands.json
 temp.log
 temp.errors
 *.ini
