@@ -16,13 +16,19 @@ pros::Motor leftBack (leftBackMotor, true);
 pros::Motor rightBack (rightBackMotor);
 pros::Motor leftFront (leftFrontMotor, true);
 pros::Motor rightFront (rightFrontMotor);
+pros::Motor_Group leftWheels ({leftBack, leftFront});
+pros::Motor_Group rightWheels ({rightBack, rightFront});
+
+
 pros::Controller master (CONTROLLER_MASTER);
 
-pros::Motor cataMotor (cataPort);
+pros::Motor cata (cataPort);
 pros::Motor wingMotor (wingMotorPort);
 
-pros::Motor leftArmMotor(leftArmMotorPort, true);
-pros::Motor rightArmMotor(rightArmMotorPort);
+pros::Motor leftArmMotor (leftArmMotorPort, true);
+pros::Motor rightArmMotor (rightArmMotorPort);
+
+pros::Motor_Group armMotors ({leftArmMotor, rightArmMotor});
 
 
 
@@ -96,18 +102,14 @@ void autonomous() {
 	pros::delay(1500);
 	int init_distance = 1500;
 	int vel = 70;
-	leftBack.move_absolute(init_distance,vel);
-	leftFront.move_absolute(init_distance,vel);
-	rightBack.move_absolute(init_distance,vel);
-	rightFront.move_absolute(init_distance,vel);
+	leftWheels.move_absolute(init_distance,vel);
+	rightWheels.move_absolute(init_distance,vel);
 	
 	int waitstart1 = pros::millis();
 
-	while ((pros::millis() - waitstart1) <= 2000) { 
+	pros::delay(2000);
 
-	}
-
-	cataMotor.move_relative(300,vel);
+	cata.move_relative(300,vel);
 }
 
 /**
@@ -130,11 +132,11 @@ void opcontrol() {
   while (true) {
 
 	// variable collection
-	cataMotor.set_encoder_units(MOTOR_ENCODER_COUNTS);
+	cata.set_encoder_units(MOTOR_ENCODER_COUNTS);
 
 
 
-// drivetrain inputs
+	// Get drivetrain power per side
 	// float scaleFactor is moved out of while loop
 	int power = master.get_analog(ANALOG_LEFT_Y)*scaleFactor;
     int turn = -1*master.get_analog(ANALOG_RIGHT_X)*scaleFactor;
@@ -146,31 +148,28 @@ void opcontrol() {
 
 	//float left = master.get_analog(ANALOG_LEFT_Y);
 	//float right = master.get_analog(ANALOG_RIGHT_Y);
-// jit trippin
 	//left *= scaleFactor;
 	//right *= scaleFactor;
 
-//drive train commands
-	leftBack.move(left);
-	leftFront.move(left);
-	rightBack.move(right); // negated cuz the motors was lowk flipped
-	rightFront.move(right); // negated cuz the motors was lowk flipped
+	// Drivetrain
+	leftWheels.move(left);
+	rightWheels.move(right); // negated cuz the motors was lowk flipped
 
-// cata code
-	cataPos = cataMotor.get_position(); //  getting absolute 
+	// Catapult
+	cataPos = cata.get_position(); //  getting absolute 
 	if(master.get_digital(DIGITAL_UP)){
-		cataMotor.move_velocity(-CATA_SPEED);
+		cata.move_velocity(-CATA_SPEED);
 	} else if (master.get_digital(DIGITAL_DOWN)){ // engaged 
-		cataMotor.move_velocity(CATA_SPEED); 
+		cata.move_velocity(CATA_SPEED); 
 	} else {
-		cataMotor.set_brake_mode(MOTOR_BRAKE_HOLD);
-		cataMotor.move_velocity(0);
+		cata.set_brake_mode(MOTOR_BRAKE_HOLD);
+		cata.move_velocity(0);
 
 		// keep moving to last known position
-		cataMotor.move_absolute(cataPos, 100);
+		cata.move_absolute(cataPos, 100);
 	}
 
-// wings code
+	// Wings
 	if(master.get_digital(DIGITAL_R1)){
 		wingMotor.move_velocity(100);
 	} else if (master.get_digital(DIGITAL_R2)){
@@ -180,19 +179,15 @@ void opcontrol() {
 
 	}
 
-	// arm code
-
+	// Arm
 	if(master.get_digital(DIGITAL_X)){
-		leftArmMotor.move_velocity(100);
-		rightArmMotor.move_velocity(100);
+		armMotors.move_velocity(100);
 	} else if (master.get_digital(DIGITAL_B)){
-		leftArmMotor.move_velocity(-100);
-		rightArmMotor.move_velocity(-100);
+		armMotors.move_velocity(-100);
 	} else {
 		leftArmMotor.set_brake_mode(MOTOR_BRAKE_HOLD);
 		rightArmMotor.set_brake_mode(MOTOR_BRAKE_HOLD);
-		leftArmMotor.move_velocity(0);
-		rightArmMotor.move_velocity(0);
+		armMotors.move_velocity(0);
 	}
 
 	
