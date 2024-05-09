@@ -86,6 +86,36 @@ void disabled() {}
 void competition_initialize() {}
 
 /**
+ * Moves forward cm number of centimeters
+*/
+void moveForward(int cm){
+	// 1 cm = 360 counts
+	int counts = cm * 360;
+	leftWheels.move_absolute(counts, 100);
+	rightWheels.move_absolute(counts, 100);
+}
+
+/**
+ * Turns the robot left by degrees
+*/
+void turnLeft(int degrees){
+	// 1 degree = 3.5 counts
+	int counts = degrees * 3.5;
+	leftWheels.move_absolute(-counts, 100);
+	rightWheels.move_absolute(counts, 100);
+}
+
+/**
+ * Turns the robot right by degrees
+*/
+void turnRight(int degrees){
+	// 1 degree = 3.5 counts
+	int counts = degrees * 3.5;
+	leftWheels.move_absolute(counts, 100);
+	rightWheels.move_absolute(-counts, 100);
+}
+
+/**
  * Runs the user autonomous code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
  * the Field Management System or the VEX Competition Switch in the autonomous
@@ -104,8 +134,6 @@ void autonomous() {
 	int vel = 70;
 	leftWheels.move_absolute(init_distance,vel);
 	rightWheels.move_absolute(init_distance,vel);
-	
-	int waitstart1 = pros::millis();
 
 	pros::delay(2000);
 
