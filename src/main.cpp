@@ -1,7 +1,39 @@
 #include "main.h"
 
+#define leftBackMotor 3
+#define leftFrontMotor 4
+#define rightBackMotor 7
+#define rightFrontMotor 8
+
+#define cataPort 10
+
+#define wingMotorPort 9
+
+#define leftArmMotorPort 1
+#define rightArmMotorPort 2
+
+pros::Motor leftBack (leftBackMotor, true);
+pros::Motor rightBack (rightBackMotor);
+pros::Motor leftFront (leftFrontMotor, true);
+pros::Motor rightFront (rightFrontMotor);
+pros::Controller master (CONTROLLER_MASTER);
+
+pros::Motor cataMotor (cataPort);
+pros::Motor wingMotor (wingMotorPort);
+
+pros::Motor leftArmMotor(leftArmMotorPort, true);
+pros::Motor rightArmMotor(rightArmMotorPort);
+
+
+
+
+// CONSTANTS and vars ---------
+
+int CATA_SPEED = 70;
+int cataPos = 0;
+
 /**
- * A callback function for LLEMU's center button.
+ * A callback function for LLEMU's center button.gfyyf
  *
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
@@ -24,7 +56,7 @@ void on_center_button() {
  */
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Self Destruct Activated!");
+	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
 }
@@ -58,7 +90,25 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+
+void autonomous() {
+
+	pros::delay(1500);
+	int init_distance = 1500;
+	int vel = 70;
+	leftBack.move_absolute(init_distance,vel);
+	leftFront.move_absolute(init_distance,vel);
+	rightBack.move_absolute(init_distance,vel);
+	rightFront.move_absolute(init_distance,vel);
+	
+	int waitstart1 = pros::millis();
+
+	while ((pros::millis() - waitstart1) <= 2000) { 
+
+	}
+
+	cataMotor.move_relative(300,vel);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -73,21 +123,84 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
+
 void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
+	// NOTE TO AYAAN: MOTORS DEFINED UP TOP
+	float scaleFactor = 1.00;
+  while (true) {
 
-	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
+	// variable collection
+	cataMotor.set_encoder_units(MOTOR_ENCODER_COUNTS);
 
-		left_mtr = left;
-		right_mtr = right;
 
-		pros::delay(20);
+
+// drivetrain inputs
+	// float scaleFactor is moved out of while loop
+	int power = master.get_analog(ANALOG_LEFT_Y)*scaleFactor;
+    int turn = -1*master.get_analog(ANALOG_RIGHT_X)*scaleFactor;
+    //float left = copysign((pow(power - turn, 2) ) / 100, power - turn);
+    //float right = copysign((pow(power + turn , 2) ) / 100, power + turn);
+	float left = power - turn;
+
+	float right = power + turn;
+
+	//float left = master.get_analog(ANALOG_LEFT_Y);
+	//float right = master.get_analog(ANALOG_RIGHT_Y);
+// jit trippin
+	//left *= scaleFactor;
+	//right *= scaleFactor;
+
+//drive train commands
+	leftBack.move(left);
+	leftFront.move(left);
+	rightBack.move(right); // negated cuz the motors was lowk flipped
+	rightFront.move(right); // negated cuz the motors was lowk flipped
+
+// cata code
+	cataPos = cataMotor.get_position(); //  getting absolute 
+	if(master.get_digital(DIGITAL_UP)){
+		cataMotor.move_velocity(-CATA_SPEED);
+	} else if (master.get_digital(DIGITAL_DOWN)){ // engaged 
+		cataMotor.move_velocity(CATA_SPEED); 
+	} else {
+		cataMotor.set_brake_mode(MOTOR_BRAKE_HOLD);
+		cataMotor.move_velocity(0);
+
+		// keep moving to last known position
+		cataMotor.move_absolute(cataPos, 100);
+	}
+
+// wings code
+	if(master.get_digital(DIGITAL_R1)){
+		wingMotor.move_velocity(100);
+	} else if (master.get_digital(DIGITAL_R2)){
+		wingMotor.move_velocity(-100);
+	} else {
+		wingMotor.move_velocity(0);
+
+	}
+
+	// arm code
+
+	if(master.get_digital(DIGITAL_X)){
+		leftArmMotor.move_velocity(100);
+		rightArmMotor.move_velocity(100);
+	} else if (master.get_digital(DIGITAL_B)){
+		leftArmMotor.move_velocity(-100);
+		rightArmMotor.move_velocity(-100);
+	} else {
+		leftArmMotor.set_brake_mode(MOTOR_BRAKE_HOLD);
+		rightArmMotor.set_brake_mode(MOTOR_BRAKE_HOLD);
+		leftArmMotor.move_velocity(0);
+		rightArmMotor.move_velocity(0);
+	}
+
+	
+
+
+//delay ig
+    pros::delay(2);
 	}
 }
+
+// testing github commits
