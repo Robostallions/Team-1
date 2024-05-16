@@ -195,27 +195,27 @@ An Autonomous Win Point is awarded to any Alliance that ends the Autonomous Peri
 	else if(!(teamred) && extraball){
 		
 		if(WeNeedToHeadBackToTheBar){
-			continue;
+			// Add working code
 		} else{
-			continue;
+			// Add working code
 		}
 	} 
 	
 	else if(teamred && !(extraball)){
 		
 		if(WeNeedToHeadBackToTheBar){
-			continue;
+			// Add working code
 		} else{
-			continue;
+			// Add working code
 		}
 	} 
 	
 	else{
 		
 		if(WeNeedToHeadBackToTheBar){
-			continue;
+			// Add working code
 		} else{
-			continue;
+			// Add working code
 		}
 	}
 	pros::delay(2000);
