@@ -225,7 +225,6 @@ An Autonomous Win Point is awarded to any Alliance that ends the Autonomous Peri
 	/**move backward and forward align*/
 	moveBackward(1.41);
 }
-}
 
 /**
  * Runs the operator control code. This function will be started in its own task
