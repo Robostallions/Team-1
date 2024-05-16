@@ -16,4 +16,4 @@ temp.errors
 
 # Settings
 compile_commands.json
-./vscode
+.vscode/
