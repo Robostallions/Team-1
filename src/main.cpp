@@ -86,13 +86,20 @@ void disabled() {}
 void competition_initialize() {}
 
 /**
- * Moves forward cm number of centimeters
+ * Moves forward ft number of feet
 */
-void moveForward(int cm){
-	// 1 cm = 360 counts
-	int counts = cm * 360;
+void moveForward(int ft){
+	// 1 ft = 360 counts
+	int counts = ft * 360;
 	leftWheels.move_absolute(counts, 100);
 	rightWheels.move_absolute(counts, 100);
+}
+
+void moveBackward(int ft){
+	// 1 ft = 360 counts
+	int counts = ft * 360;
+	leftWheels.move_absolute(-counts, 100);
+	rightWheels.move_absolute(-counts, 100);
 }
 
 /**
@@ -129,6 +136,22 @@ void turnRight(int degrees){
 
 void autonomous() {
 
+	/*
+	An Autonomous Win Point is awarded to any Alliance that ends the Autonomous Period with the following tasks completed::
+	1. Removed the Triball from the Alliance’sMatch Load Zone that coincides with their Starting Tiles. 
+		For example, in Figure 21, the red Alliance must remove the Triball that begins in the bottom-left Match Load Zone, adjacent to Robot 1’s Starting Tiles.
+	2. Scored at least one of their own Alliance Triballs in the Alliance’s own Goal.
+	3. Ended the Autonomous Period with at least one Robot contacting their own Elevation Bar.
+	4. Not violated any other rules.
+	*/
+
+	/**
+	 * Change/check these values before each match
+	*/
+	bool isRed = true;
+	bool onTeamSide = true;
+
+
 	pros::delay(1500);
 	int init_distance = 1500;
 	int vel = 70;
@@ -138,6 +161,9 @@ void autonomous() {
 	pros::delay(2000);
 
 	cata.move_relative(300,vel);
+
+	/**move backward and forward align*/
+	moveBackward(1.41);
 }
 
 /**
