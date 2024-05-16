@@ -88,16 +88,30 @@ void competition_initialize() {}
 /**
  * Moves forward ft number of feet
 */
-void moveForward(int ft){
+void moveForward(double ft){
 	// 1 ft = 360 counts
-	int counts = ft * 360;
+	double counts = ft * 360;
 	leftWheels.move_absolute(counts, 100);
 	rightWheels.move_absolute(counts, 100);
 }
 
-void moveBackward(int ft){
+void moveForward() {
+	double counts = 360;
+	leftWheels.move_absolute(counts, 100);
+	rightWheels.move_absolute(counts, 100);
+}
+
+void moveForward(double ft, int velocity) {
+	double counts = ft * 360;
+	leftWheels.move_absolute(counts, velocity);
+	rightWheels.move_absolute(counts, velocity);
+}
+
+
+
+void moveBackward(double ft){
 	// 1 ft = 360 counts
-	int counts = ft * 360;
+	double counts = ft * 360;
 	leftWheels.move_absolute(-counts, 100);
 	rightWheels.move_absolute(-counts, 100);
 }
@@ -135,35 +149,82 @@ void turnRight(int degrees){
  */
 
 void autonomous() {
+/*
+An Autonomous Win Point is awarded to any Alliance that ends the Autonomous Period with the following tasks completed::
 
-	/*
-	An Autonomous Win Point is awarded to any Alliance that ends the Autonomous Period with the following tasks completed::
-	1. Removed the Triball from the Alliance’sMatch Load Zone that coincides with their Starting Tiles. 
-		For example, in Figure 21, the red Alliance must remove the Triball that begins in the bottom-left Match Load Zone, adjacent to Robot 1’s Starting Tiles.
-	2. Scored at least one of their own Alliance Triballs in the Alliance’s own Goal.
-	3. Ended the Autonomous Period with at least one Robot contacting their own Elevation Bar.
-	4. Not violated any other rules.
-	*/
+1. Removed the Triball from the Alliance’sMatch Load Zone that coincides with their Starting Tiles. 
+	For example, in Figure 21, the red Alliance must remove the Triball that begins in the bottom-left Match Load Zone, adjacent to Robot 1’s Starting Tiles.
+2. Scored at least one of their own Alliance Triballs in the Alliance’s own Goal.
+3. Ended the Autonomous Period with at least one Robot contacting their own Elevation Bar.
+4. Not violated any other rules.
+*/
+	bool WeNeedToHeadBackToTheBar = true; //These needs to be worked out with cooperating team before the match
+	bool extraball = true; // are we on the side with the extra ball?
+	bool teamred = true; //This needs to be figured out before the match
 
-	/**
-	 * Change/check these values before each match
-	*/
-	bool isRed = true;
-	bool onTeamSide = true;
-
-
-	pros::delay(1500);
+	//ALL OF THIS CODE IS UNTESTED. INDIVIDUAL LAYOUTS (blue team + extraball) CAN BE ADJUSTED AS NECESSARY
+	//as of right now Red/Blue team code is copy/paste.
 	int init_distance = 1500;
-	int vel = 70;
-	leftWheels.move_absolute(init_distance,vel);
-	rightWheels.move_absolute(init_distance,vel);
+	int vel = 100;
+	//cata.move_relative(300,vel);
 
+	if(teamred && extraball) { 
+		if(WeNeedToHeadBackToTheBar){
+			moveForward(5);
+			turnLeft(20);
+			moveForward(1);
+			turnRight(110);
+			moveForward(2.3);
+			moveForward(-0.2);
+			turnRight(90);
+			moveForward(6);
+			turnRight(90);
+			moveForward(2.1);
+		} else{
+			turnLeft(70); // now we should be facing the extra ball
+			leftWheels.move_absolute(init_distance * 2,vel);
+			rightWheels.move_absolute(init_distance * 2,vel);
+			turnRight(100); // we should now be facing the ball in the middle with the red triball & extra triball in front of the robot
+			leftWheels.move_absolute(init_distance * 1.3,vel);
+			rightWheels.move_absolute(init_distance * 1.3,vel);
+			turnRight(60);
+			leftWheels.move_absolute(init_distance,vel);
+			rightWheels.move_absolute(init_distance,vel);// if all goes well & this executes right we will have 2-3 triballs in our goal
+		}
+	} 
+	else if(!(teamred) && extraball){
+		
+		if(WeNeedToHeadBackToTheBar){
+			continue;
+		} else{
+			continue;
+		}
+	} 
+	
+	else if(teamred && !(extraball)){
+		
+		if(WeNeedToHeadBackToTheBar){
+			continue;
+		} else{
+			continue;
+		}
+	} 
+	
+	else{
+		
+		if(WeNeedToHeadBackToTheBar){
+			continue;
+		} else{
+			continue;
+		}
+	}
 	pros::delay(2000);
 
 	cata.move_relative(300,vel);
 
 	/**move backward and forward align*/
 	moveBackward(1.41);
+}
 }
 
 /**
